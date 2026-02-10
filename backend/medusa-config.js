@@ -25,7 +25,7 @@ import {
 } from 'lib/constants';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
-const hitpayPlugin = require("./plugins/medusa-payment-hitpay/dist/index").default
+const hitpayPlugin = "./src/plugins/medusa-payment-hitpay"
 
 const medusaConfig = {
   projectConfig: {
