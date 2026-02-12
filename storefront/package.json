@@ -20,11 +20,12 @@
   },
   "resolutions": {
     "webpack": "^5",
-    "typescript": "5.7.2"
+    "typescript": "5.5.4"
   },
   "dependencies": {
     "@headlessui/react": "^1.6.1",
     "@hookform/error-message": "^2.0.0",
+    "react-hook-form": "^7.54.2",
     "@medusajs/js-sdk": "preview",
     "@medusajs/types": "preview",
     "@medusajs/ui": "preview",
@@ -68,6 +69,6 @@
     "postcss": "^8.4.8",
     "prettier": "^2.8.8",
     "tailwindcss": "^3.0.23",
-    "typescript": "5.7.2"
+    "typescript": "5.5.4"
   }
 }
