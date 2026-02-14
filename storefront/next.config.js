@@ -18,32 +18,63 @@ const nextConfig = {
       {
         protocol: "http",
         hostname: "localhost",
-        
       },
-      { // Note: needed to serve images from /public folder
-        protocol: process.env.NEXT_PUBLIC_BASE_URL?.startsWith('https') ? 'https' : 'http',
-        hostname: process.env.NEXT_PUBLIC_BASE_URL?.replace(/^https?:\/\//, ''),
+      {
+        // Note: needed to serve images from /public folder
+        protocol: process.env.NEXT_PUBLIC_BASE_URL?.startsWith("https")
+          ? "https"
+          : "http",
+        hostname: process.env.NEXT_PUBLIC_BASE_URL?.replace(
+          /^https?:\/\//,
+          ""
+        ).split(":")[0],
+        port: process.env.NEXT_PUBLIC_BASE_URL?.split(":")[2],
       },
-      { // Note: only needed when using local-file for product media
-        protocol: "https",
-        hostname: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.replace('https://', ''),
+      {
+        // Note: only needed when using local-file for product media
+        protocol: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.startsWith(
+          "https"
+        )
+          ? "https"
+          : "http",
+        hostname: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.replace(
+          /^https?:\/\//,
+          ""
+        ).split(":")[0],
+        port: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.split(":")[2],
       },
-      { // Note: can be removed after deleting demo products
+      {
+        // Note: can be removed after deleting demo products
         protocol: "https",
         hostname: "medusa-public-images.s3.eu-west-1.amazonaws.com",
       },
-      { // Note: can be removed after deleting demo products
+      {
+        // Note: can be removed after deleting demo products
         protocol: "https",
         hostname: "medusa-server-testing.s3.amazonaws.com",
       },
-      { // Note: can be removed after deleting demo products
+      {
+        // Note: can be removed after deleting demo products
         protocol: "https",
         hostname: "medusa-server-testing.s3.us-east-1.amazonaws.com",
       },
-      ...(process.env.NEXT_PUBLIC_MINIO_ENDPOINT ? [{ // Note: needed when using MinIO bucket storage for media
-        protocol: "https",
-        hostname: process.env.NEXT_PUBLIC_MINIO_ENDPOINT,
-      }] : []),
+      ...(process.env.NEXT_PUBLIC_MINIO_ENDPOINT
+        ? [
+          {
+            // Note: needed when using MinIO bucket storage for media
+            protocol: process.env.NEXT_PUBLIC_MINIO_ENDPOINT?.startsWith(
+              "http"
+            )
+              ? process.env.NEXT_PUBLIC_MINIO_ENDPOINT?.split("://")[0]
+              : "https",
+            hostname: process.env.NEXT_PUBLIC_MINIO_ENDPOINT?.replace(
+              /^https?:\/\//,
+              ""
+            ).split(":")[0],
+            port: process.env.NEXT_PUBLIC_MINIO_ENDPOINT?.split(":")[2],
+          },
+        ]
+        : []),
     ],
   },
   serverRuntimeConfig: {
