@@ -27,7 +27,7 @@ const nextConfig = {
         hostname: process.env.NEXT_PUBLIC_BASE_URL?.replace(
           /^https?:\/\//,
           ""
-        ).split(":")[0],
+        ).split(/[/?#]/)[0].split(":")[0],
         port: process.env.NEXT_PUBLIC_BASE_URL?.split(":")[2],
       },
       {
@@ -40,7 +40,7 @@ const nextConfig = {
         hostname: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.replace(
           /^https?:\/\//,
           ""
-        ).split(":")[0],
+        ).split(/[/?#]/)[0].split(":")[0],
         port: process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL?.split(":")[2],
       },
       {
@@ -70,7 +70,7 @@ const nextConfig = {
             hostname: process.env.NEXT_PUBLIC_MINIO_ENDPOINT?.replace(
               /^https?:\/\//,
               ""
-            ).split(":")[0],
+            ).split(/[/?#]/)[0].split(":")[0],
             port: process.env.NEXT_PUBLIC_MINIO_ENDPOINT?.split(":")[2],
           },
         ]
