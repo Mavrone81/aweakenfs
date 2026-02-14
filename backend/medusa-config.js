@@ -25,7 +25,6 @@ import {
 } from 'lib/constants';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
-const hitpayPlugin = "./src/plugins/medusa-payment-hitpay"
 
 const medusaConfig = {
   projectConfig: {
@@ -131,19 +130,6 @@ const medusaConfig = {
               webhookSecret: STRIPE_WEBHOOK_SECRET,
               capture: true,
             },
-          },
-          {
-            resolve: hitpayPlugin,
-            id: "hitpay",
-            options: {
-              apiKey: process.env.HITPAY_API_KEY,
-              hmacSalt: process.env.HITPAY_HMAC_SALT,
-              redirectUrl: process.env.HITPAY_REDIRECT_URL,
-              webhookUrl: process.env.HITPAY_WEBHOOK_URL,
-              paymentMethods: process.env.HITPAY_PAYMENT_METHODS
-                ? process.env.HITPAY_PAYMENT_METHODS.split(",")
-                : ["card", "paynow_online"],
-            }
           },
         ],
       },
