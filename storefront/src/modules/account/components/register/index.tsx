@@ -24,7 +24,7 @@ const Register = ({ setCurrentView }: Props) => {
       <h1 className="text-large-semi uppercase mb-6">
         Become an Awaken Store Member
       </h1>
-      <p className="text-center text-base-regular text-ui-fg-base mb-4">
+      <p className="text-base-regular text-ui-fg-subtle mb-8">
         Create your Awaken Store Member profile, and get access to an enhanced
         shopping experience.
       </p>

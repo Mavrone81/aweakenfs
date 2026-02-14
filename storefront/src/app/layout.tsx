@@ -4,6 +4,10 @@ import "styles/globals.css"
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
+  title: {
+    default: "Awaken Store",
+    template: "%s | Awaken Store",
+  },
 }
 
 export default function RootLayout(props: { children: React.ReactNode }) {
