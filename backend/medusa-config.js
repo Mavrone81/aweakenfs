@@ -21,7 +21,11 @@ import {
   MINIO_SECRET_KEY,
   MINIO_BUCKET,
   MEILISEARCH_HOST,
-  MEILISEARCH_ADMIN_KEY
+  MEILISEARCH_ADMIN_KEY,
+  RINGGITPAY_APP_ID,
+  RINGGITPAY_REQUEST_KEY,
+  RINGGITPAY_RESPONSE_KEY,
+  RINGGITPAY_IS_SANDBOX
 } from 'lib/constants';
 
 loadEnv(process.env.NODE_ENV, process.cwd());
@@ -129,6 +133,24 @@ const medusaConfig = {
               apiKey: STRIPE_API_KEY,
               webhookSecret: STRIPE_WEBHOOK_SECRET,
               capture: true,
+            },
+          },
+        ],
+      },
+    }] : []),
+    ...(RINGGITPAY_APP_ID && RINGGITPAY_REQUEST_KEY && RINGGITPAY_RESPONSE_KEY ? [{
+      key: Modules.PAYMENT,
+      resolve: '@medusajs/payment',
+      options: {
+        providers: [
+          {
+            resolve: './src/modules/ringgitpay',
+            id: 'ringgitpay',
+            options: {
+              appId: RINGGITPAY_APP_ID,
+              requestKey: RINGGITPAY_REQUEST_KEY,
+              responseKey: RINGGITPAY_RESPONSE_KEY,
+              isSandbox: RINGGITPAY_IS_SANDBOX === 'true',
             },
           },
         ],

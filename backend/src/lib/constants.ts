@@ -91,6 +91,14 @@ export const MEILISEARCH_HOST = process.env.MEILISEARCH_HOST;
 export const MEILISEARCH_ADMIN_KEY = process.env.MEILISEARCH_ADMIN_KEY;
 
 /**
+ * (optional) RinggitPay configuration
+ */
+export const RINGGITPAY_APP_ID = process.env.RINGGITPAY_APP_ID;
+export const RINGGITPAY_REQUEST_KEY = process.env.RINGGITPAY_REQUEST_KEY;
+export const RINGGITPAY_RESPONSE_KEY = process.env.RINGGITPAY_RESPONSE_KEY;
+export const RINGGITPAY_IS_SANDBOX = process.env.RINGGITPAY_IS_SANDBOX;
+
+/**
  * Worker mode
  */
 export const WORKER_MODE =
