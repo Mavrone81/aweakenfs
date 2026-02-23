@@ -1,7 +1,7 @@
 import { ModuleProviderExports } from '@medusajs/framework/types'
-import MyPaymentProviderService from "./service"
+import RinggitPayProviderService from "./service"
 
-const services = [MyPaymentProviderService]
+const services = [RinggitPayProviderService]
 
 const providerExport: ModuleProviderExports = {
     services,
