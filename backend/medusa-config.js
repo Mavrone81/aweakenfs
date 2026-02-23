@@ -121,12 +121,12 @@ const medusaConfig = {
         ]
       }
     }] : []),
-    ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{
+    ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET || (RINGGITPAY_APP_ID && RINGGITPAY_REQUEST_KEY && RINGGITPAY_RESPONSE_KEY) ? [{
       key: Modules.PAYMENT,
       resolve: '@medusajs/payment',
       options: {
         providers: [
-          {
+          ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{
             resolve: '@medusajs/payment-stripe',
             id: 'stripe',
             options: {
@@ -134,16 +134,8 @@ const medusaConfig = {
               webhookSecret: STRIPE_WEBHOOK_SECRET,
               capture: true,
             },
-          },
-        ],
-      },
-    }] : []),
-    ...(RINGGITPAY_APP_ID && RINGGITPAY_REQUEST_KEY && RINGGITPAY_RESPONSE_KEY ? [{
-      key: Modules.PAYMENT,
-      resolve: '@medusajs/payment',
-      options: {
-        providers: [
-          {
+          }] : []),
+          ...(RINGGITPAY_APP_ID && RINGGITPAY_REQUEST_KEY && RINGGITPAY_RESPONSE_KEY ? [{
             resolve: './src/modules/ringgitpay',
             id: 'ringgitpay',
             options: {
@@ -152,7 +144,7 @@ const medusaConfig = {
               responseKey: RINGGITPAY_RESPONSE_KEY,
               isSandbox: RINGGITPAY_IS_SANDBOX === 'true',
             },
-          },
+          }] : [])
         ],
       },
     }] : [])
