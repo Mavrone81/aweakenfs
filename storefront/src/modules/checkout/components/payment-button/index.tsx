@@ -9,7 +9,7 @@ import ErrorMessage from "../error-message"
 import Spinner from "@modules/common/icons/spinner"
 import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
-import { isManual, isPaypal, isStripe } from "@lib/constants"
+import { isManual, isPaypal, isStripe, isRinggitPay } from "@lib/constants"
 
 type PaymentButtonProps = {
   cart: HttpTypes.StoreCart
@@ -53,6 +53,14 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
     case isPaypal(paymentSession?.provider_id):
       return (
         <PayPalPaymentButton
+          notReady={notReady}
+          cart={cart}
+          data-testid={dataTestId}
+        />
+      )
+    case isRinggitPay(paymentSession?.provider_id):
+      return (
+        <RinggitPayPaymentButton
           notReady={notReady}
           cart={cart}
           data-testid={dataTestId}
@@ -293,6 +301,81 @@ const ManualTestPaymentButton = ({ notReady }: { notReady: boolean }) => {
       <ErrorMessage
         error={errorMessage}
         data-testid="manual-payment-error-message"
+      />
+    </>
+  )
+}
+
+const RinggitPayPaymentButton = ({
+  cart,
+  notReady,
+  "data-testid": dataTestId,
+}: {
+  cart: HttpTypes.StoreCart
+  notReady: boolean
+  "data-testid"?: string
+}) => {
+  const [submitting, setSubmitting] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const session = cart.payment_collection?.payment_sessions?.find(
+    (s) => s.provider_id === "ringgitpay"
+  )
+
+  const handlePayment = async () => {
+    setSubmitting(true)
+
+    if (!session || !session.data.payment_url) {
+      setErrorMessage("Could not initialize RinggitPay session.")
+      setSubmitting(false)
+      return
+    }
+
+    // Since RinggitPay requires an NVP form-based POST, we create a hidden form and submit it.
+    const form = document.createElement("form")
+    form.method = "POST"
+    form.action = session.data.payment_url as string
+
+    // Map necessary fields from session data
+    const fields = [
+      "appId",
+      "currency",
+      "amount",
+      "orderId",
+      "checkSum",
+      "buyerEmail",
+      "returnURL",
+      "accName",
+    ]
+
+    fields.forEach((field) => {
+      if (session.data[field]) {
+        const input = document.createElement("input")
+        input.type = "hidden"
+        input.name = field
+        input.value = String(session.data[field])
+        form.appendChild(input)
+      }
+    })
+
+    document.body.appendChild(form)
+    form.submit()
+  }
+
+  return (
+    <>
+      <Button
+        disabled={notReady}
+        isLoading={submitting}
+        onClick={handlePayment}
+        size="large"
+        data-testid={dataTestId}
+      >
+        Pay with RinggitPay
+      </Button>
+      <ErrorMessage
+        error={errorMessage}
+        data-testid="ringgitpay-payment-error-message"
       />
     </>
   )

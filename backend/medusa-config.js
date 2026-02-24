@@ -121,7 +121,7 @@ const medusaConfig = {
         ]
       }
     }] : []),
-    ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET || (RINGGITPAY_APP_ID && RINGGITPAY_REQUEST_KEY && RINGGITPAY_RESPONSE_KEY) ? [{
+    ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET || (process.env.RINGGITPAY_APP_ID && process.env.RINGGITPAY_REQUEST_KEY) ? [{
       key: Modules.PAYMENT,
       resolve: '@medusajs/payment',
       options: {
@@ -135,14 +135,14 @@ const medusaConfig = {
               capture: true,
             },
           }] : []),
-          ...(RINGGITPAY_APP_ID && RINGGITPAY_REQUEST_KEY && RINGGITPAY_RESPONSE_KEY ? [{
+          ...(process.env.RINGGITPAY_APP_ID && process.env.RINGGITPAY_REQUEST_KEY ? [{
             resolve: './src/modules/ringgitpay',
             id: 'ringgitpay',
             options: {
-              appId: RINGGITPAY_APP_ID,
-              requestKey: RINGGITPAY_REQUEST_KEY,
-              responseKey: RINGGITPAY_RESPONSE_KEY,
-              isSandbox: RINGGITPAY_IS_SANDBOX === 'true',
+              appId: process.env.RINGGITPAY_APP_ID,
+              requestKey: process.env.RINGGITPAY_REQUEST_KEY,
+              responseKey: process.env.RINGGITPAY_RESPONSE_KEY || process.env.RINGGITPAY_REQUEST_KEY,
+              isSandbox: process.env.RINGGITPAY_IS_SANDBOX === 'true',
             },
           }] : [])
         ],
