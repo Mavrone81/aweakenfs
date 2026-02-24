@@ -1,4 +1,6 @@
 import { AbstractPaymentProvider, BigNumber } from "@medusajs/framework/utils";
+console.log("[RinggitPay] Service file evaluated");
+
 import {
     AuthorizePaymentInput,
     AuthorizePaymentOutput,

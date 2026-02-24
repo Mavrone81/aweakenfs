@@ -4,6 +4,8 @@ import { CreditCard } from "@medusajs/icons"
 import Ideal from "@modules/common/icons/ideal"
 import Bancontact from "@modules/common/icons/bancontact"
 import PayPal from "@modules/common/icons/paypal"
+import RinggitPay from "@modules/common/icons/ringgitpay"
+
 
 /* Map of payment provider_id to their title and icon. Add in any payment providers you want to use. */
 export const paymentInfoMap: Record<
@@ -30,9 +32,9 @@ export const paymentInfoMap: Record<
     title: "Manual Payment",
     icon: <CreditCard />,
   },
-  ringgitpay: {
+  pp_ringgitpay_ringgitpay: {
     title: "RinggitPay",
-    icon: <CreditCard />,
+    icon: <RinggitPay />,
   },
   // Add more payment providers here
 }
@@ -48,7 +50,7 @@ export const isManual = (providerId?: string) => {
   return providerId?.startsWith("pp_system_default")
 }
 export const isRinggitPay = (providerId?: string) => {
-  return providerId === "ringgitpay"
+  return providerId === "pp_ringgitpay_ringgitpay"
 }
 
 // Add currencies that don't need to be divided by 100

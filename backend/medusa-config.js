@@ -121,17 +121,17 @@ const medusaConfig = {
         ]
       }
     }] : []),
-    ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET || (process.env.RINGGITPAY_APP_ID && process.env.RINGGITPAY_REQUEST_KEY) ? [{
+    {
       key: Modules.PAYMENT,
       resolve: '@medusajs/payment',
       options: {
         providers: [
-          ...(STRIPE_API_KEY && STRIPE_WEBHOOK_SECRET ? [{
+          ...(process.env.STRIPE_API_KEY && process.env.STRIPE_WEBHOOK_SECRET ? [{
             resolve: '@medusajs/payment-stripe',
             id: 'stripe',
             options: {
-              apiKey: STRIPE_API_KEY,
-              webhookSecret: STRIPE_WEBHOOK_SECRET,
+              apiKey: process.env.STRIPE_API_KEY,
+              webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
               capture: true,
             },
           }] : []),
@@ -147,7 +147,7 @@ const medusaConfig = {
           }] : [])
         ],
       },
-    }] : [])
+    }
   ],
   plugins: [
     ...(MEILISEARCH_HOST && MEILISEARCH_ADMIN_KEY ? [{
