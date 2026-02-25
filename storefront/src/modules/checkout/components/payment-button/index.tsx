@@ -319,7 +319,7 @@ const RinggitPayPaymentButton = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const session = cart.payment_collection?.payment_sessions?.find(
-    (s) => s.provider_id === "ringgitpay"
+    (s) => s.provider_id === "pp_ringgitpay_ringgitpay"
   )
 
   const handlePayment = async () => {

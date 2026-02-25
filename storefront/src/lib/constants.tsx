@@ -32,7 +32,7 @@ export const paymentInfoMap: Record<
     title: "Manual Payment",
     icon: <CreditCard />,
   },
-  ringgitpay: {
+  pp_ringgitpay_ringgitpay: {
     title: "RinggitPay",
     icon: <RinggitPay />,
   },
@@ -50,7 +50,7 @@ export const isManual = (providerId?: string) => {
   return providerId?.startsWith("pp_system_default")
 }
 export const isRinggitPay = (providerId?: string) => {
-  return providerId === "ringgitpay"
+  return providerId === "pp_ringgitpay_ringgitpay"
 }
 
 // Add currencies that don't need to be divided by 100
