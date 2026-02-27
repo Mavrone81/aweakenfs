@@ -83,7 +83,9 @@ class RinggitPayProviderService extends AbstractPaymentProvider<Options> {
 
         // Map frontend return URL
         const storefrontURL = process.env.STORE_URL ? (process.env.STORE_URL.startsWith('http') ? process.env.STORE_URL : `https://${process.env.STORE_URL}`) : "http://localhost:8000";
-        const countryCode = "my"; // Default country code
+
+        // Derive country code from currency for redirection
+        const countryCode = currency_code.toLowerCase() === "myr" ? "my" : (currency_code.toLowerCase() === "sgd" ? "sg" : "my");
 
         // Use checkout review for temp orders to allow cart completion, same as HitPay
         const returnURL = orderId.startsWith("temp_")

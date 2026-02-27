@@ -126,10 +126,12 @@ export async function middleware(request: NextRequest) {
     response = NextResponse.redirect(`${redirectUrl}`, 307)
   }
 
-  // If a cart_id is in the params, we set it as a cookie and redirect to the address step.
-  if (cartId && !checkoutStep) {
-    redirectUrl = `${redirectUrl}&step=address`
-    response = NextResponse.redirect(`${redirectUrl}`, 307)
+  // If a cart_id is in the params, we set it as a cookie.
+  if (cartId) {
+    if (!checkoutStep) {
+      redirectUrl = `${redirectUrl}&step=address`
+      response = NextResponse.redirect(`${redirectUrl}`, 307)
+    }
     response.cookies.set("_medusa_cart_id", cartId, { maxAge: 60 * 60 * 24 })
   }
 
