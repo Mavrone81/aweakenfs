@@ -322,6 +322,8 @@ const RinggitPayPaymentButton = ({
     (s) => s.provider_id === "pp_ringgitpay_ringgitpay"
   )
 
+  console.log("RinggitPay Button - Session Found:", JSON.stringify({ found: !!session, provider_id: session?.provider_id }, null, 2))
+
   const handlePayment = async () => {
     setSubmitting(true)
 

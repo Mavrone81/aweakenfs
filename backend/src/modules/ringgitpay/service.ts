@@ -69,7 +69,11 @@ class RinggitPayProviderService extends AbstractPaymentProvider<Options> {
 
     async initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
         const { amount, currency_code, data: paymentData } = input;
+        const context = (input as any).context || {};
+
         const orderId = String(paymentData?.order_id || `temp_${Date.now()}`);
+        const cartId = context.resource_id || (paymentData as any)?.cart_id || "";
+        const email = context.email || (paymentData as any)?.customer?.email || "";
 
         // RinggitPay requires amount in decimal format (e.g., 100.00)
         const amountString = Number(amount).toFixed(2);
@@ -78,9 +82,13 @@ class RinggitPayProviderService extends AbstractPaymentProvider<Options> {
         const checkSum = this.generateChecksum(sourceString);
 
         // Map frontend return URL
-        const storefrontURL = process.env.STORE_URL || "http://localhost:8000";
+        const storefrontURL = process.env.STORE_URL ? (process.env.STORE_URL.startsWith('http') ? process.env.STORE_URL : `https://${process.env.STORE_URL}`) : "http://localhost:8000";
         const countryCode = "my"; // Default country code
-        const returnURL = `${storefrontURL}/${countryCode}/order/confirmed/${orderId}`;
+
+        // Use checkout review for temp orders to allow cart completion, same as HitPay
+        const returnURL = orderId.startsWith("temp_")
+            ? `${storefrontURL}/${countryCode}/checkout?step=review${cartId ? `&cart_id=${cartId}` : ""}`
+            : `${storefrontURL}/${countryCode}/order/confirmed/${orderId}`;
 
         return {
             id: orderId,
@@ -92,6 +100,7 @@ class RinggitPayProviderService extends AbstractPaymentProvider<Options> {
                 orderId: orderId,
                 checkSum: checkSum,
                 returnURL: returnURL,
+                buyerEmail: email,
                 accName: (paymentData as any)?.customer?.first_name ? `${(paymentData as any).customer.first_name} ${(paymentData as any).customer.last_name}` : "Customer",
                 payment_url: this.baseUrl
             },

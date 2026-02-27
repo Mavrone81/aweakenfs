@@ -26,6 +26,9 @@ const Payment = ({
     (paymentSession: any) => paymentSession.status === "pending"
   )
 
+  console.log("Payment Step - Available Sessions:", JSON.stringify(cart.payment_collection?.payment_sessions?.map((s: any) => ({ id: s.id, provider_id: s.provider_id })), null, 2))
+  console.log("Payment Step - Available Methods:", JSON.stringify(availablePaymentMethods?.map((m: any) => m.id), null, 2))
+
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cardBrand, setCardBrand] = useState<string | null>(null)
@@ -175,7 +178,7 @@ const Payment = ({
                     onChange={(e) => {
                       setCardBrand(
                         e.brand &&
-                          e.brand.charAt(0).toUpperCase() + e.brand.slice(1)
+                        e.brand.charAt(0).toUpperCase() + e.brand.slice(1)
                       )
                       setError(e.error?.message || null)
                       setCardComplete(e.complete)
