@@ -55,14 +55,23 @@ export default async function Checkout({
         return redirect(`/${countryCode}/order/confirmed/${cartRes.order.id}`)
       }
 
-      // If cart is already completed, find the order by cart_id
-      // @ts-ignore
-      const { orders } = await sdk.store.order.list(
-        { cart_id: [cartIdParam] },
-        getAuthHeaders()
-      )
-      if (orders?.length > 0) {
-        return redirect(`/${countryCode}/order/confirmed/${orders[0].id}`)
+      // If cart is already completed by webhook, find the most recent order 
+      // (as cart_id filter is not supported by Store API)
+      const authHeaders = getAuthHeaders()
+
+      if (Object.keys(authHeaders).length > 0) {
+        const { orders } = await sdk.store.order.list(
+          {
+            limit: 1,
+            fields: "+created_at",
+            // @ts-ignore
+            order: "-created_at"
+          },
+          authHeaders
+        )
+        if (orders?.length > 0) {
+          return redirect(`/${countryCode}/order/confirmed/${orders[0].id}`)
+        }
       }
     } catch (error) {
       console.error("Error completing cart or finding order:", error)
@@ -83,18 +92,33 @@ export default async function Checkout({
     const cartIdCookie = getCartId()
     const effectiveCartId = cartIdParam || cartIdCookie
 
-    if (effectiveCartId) {
+    if (effectiveCartId && customer) {
       try {
-        // @ts-ignore
+        // Since cart_id is not a valid filter for orders in Store API, 
+        // we fetch the customer's most recent order and check if it was created very recently.
         const { orders } = await sdk.store.order.list(
-          { cart_id: [effectiveCartId] },
+          {
+            limit: 1,
+            fields: "+created_at",
+            // @ts-ignore - Some versions support ordering by created_at natively
+            order: "-created_at"
+          },
           getAuthHeaders()
         )
+
         if (orders?.length > 0) {
-          return redirect(`/${countryCode}/order/confirmed/${orders[0].id}`)
+          const latestOrder = orders[0]
+          // Optional: Verify if the order is recent (e.g., created within the last 30 minutes)
+          const orderDate = new Date(latestOrder.created_at as string).getTime()
+          const now = new Date().getTime()
+          const diffMinutes = (now - orderDate) / (1000 * 60)
+
+          if (diffMinutes < 30) {
+            return redirect(`/${countryCode}/order/confirmed/${latestOrder.id}`)
+          }
         }
       } catch (e) {
-        console.error("Error looking up order by cart ID fallback:", e)
+        console.error("Error looking up recent order fallback:", e)
       }
     }
 
