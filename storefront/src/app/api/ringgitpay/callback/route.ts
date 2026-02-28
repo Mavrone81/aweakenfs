@@ -12,9 +12,9 @@ export async function POST(req: NextRequest) {
         // Extract RinggitPay response fields
         const rpStatusCode = formData.get("rp_statusCode")?.toString() || ""
         const rpStatusMsg = formData.get("rp_statusMsg")?.toString() || ""
-        const transactionId = formData.get("transactionId")?.toString() || ""
-        const orderId = formData.get("orderId")?.toString() || ""
-        const amount = formData.get("amount")?.toString() || ""
+        const transactionId = formData.get("rp_transactionRef")?.toString() || ""
+        const orderId = formData.get("rp_orderId")?.toString() || ""
+        const amount = formData.get("rp_amount")?.toString() || ""
 
         // Build the redirect URL with the extracted parameters as query strings
         // so the Next.js page can read them.

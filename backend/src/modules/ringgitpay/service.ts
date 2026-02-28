@@ -99,7 +99,7 @@ class RinggitPayProviderService extends AbstractPaymentProvider<Options> {
                 amount: amountString,
                 orderId: orderId,
                 checkSum: checkSum,
-                returnURL: returnURL,
+                returnURL: encodeURIComponent(returnURL),
                 buyerEmail: email,
                 accName: (paymentData as any)?.customer?.first_name ? `${(paymentData as any).customer.first_name} ${(paymentData as any).customer.last_name}` : "Customer",
                 payment_url: this.baseUrl
