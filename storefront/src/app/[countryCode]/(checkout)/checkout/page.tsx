@@ -30,7 +30,7 @@ const fetchCart = async () => {
 
 import { redirect } from "next/navigation"
 import { sdk } from "@lib/config"
-import { getAuthHeaders } from "@lib/data/cookies"
+import { getAuthHeaders, getCartId } from "@lib/data/cookies"
 
 export default async function Checkout({
   params,
@@ -79,15 +79,22 @@ export default async function Checkout({
   const customer = await getCustomer()
 
   if (!cart) {
-    // Check one more time if an order exists for the current cart ID if we have one in params
-    if (cartIdParam) {
-      // @ts-ignore
-      const { orders } = await sdk.store.order.list(
-        { cart_id: [cartIdParam] },
-        getAuthHeaders()
-      )
-      if (orders?.length > 0) {
-        return redirect(`/${countryCode}/order/confirmed/${orders[0].id}`)
+    // Check one more time if an order exists for the current cart ID if we have one in params or cookies
+    const cartIdCookie = getCartId()
+    const effectiveCartId = cartIdParam || cartIdCookie
+
+    if (effectiveCartId) {
+      try {
+        // @ts-ignore
+        const { orders } = await sdk.store.order.list(
+          { cart_id: [effectiveCartId] },
+          getAuthHeaders()
+        )
+        if (orders?.length > 0) {
+          return redirect(`/${countryCode}/order/confirmed/${orders[0].id}`)
+        }
+      } catch (e) {
+        console.error("Error looking up order by cart ID fallback:", e)
       }
     }
 
