@@ -1,5 +1,4 @@
 import { Heading, Text, Button, Container } from "@medusajs/ui"
-import { XCircleSolid } from "@medusajs/icons"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -25,7 +24,6 @@ export default function RinggitPayFailedPage({
 
                 <div className="flex flex-col items-center gap-y-4">
                     <div className="bg-red-100 rounded-full p-4 mb-2">
-                        <XCircleSolid className="w-12 h-12 text-ui-fg-error" />
                     </div>
                     <Heading level="h1" className="text-3xl font-semibold text-ui-fg-error">
                         Payment Unsuccessful

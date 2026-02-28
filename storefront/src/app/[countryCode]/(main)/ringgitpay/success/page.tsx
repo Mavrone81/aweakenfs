@@ -1,5 +1,4 @@
 import { Heading, Text, Button, Container } from "@medusajs/ui"
-import { CheckCircleSolid } from "@medusajs/icons"
 import InteractiveLink from "@modules/common/components/interactive-link"
 import { Metadata } from "next"
 
@@ -24,7 +23,6 @@ export default function RinggitPaySuccessPage({
 
                 <div className="flex flex-col items-center gap-y-4">
                     <div className="bg-ui-bg-interactive rounded-full p-4 mb-2">
-                        <CheckCircleSolid className="w-12 h-12 text-ui-fg-interactive" />
                     </div>
                     <Heading level="h1" className="text-3xl font-semibold text-ui-fg-base">
                         Payment Successful!
