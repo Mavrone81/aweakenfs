@@ -338,24 +338,26 @@ const RinggitPayPaymentButton = ({
     form.method = "POST"
     form.action = session.data.payment_url as string
 
-    // Map necessary fields from session data
+    // Map necessary fields from session data to RinggitPay expected names
     const fields = [
-      "appId",
-      "currency",
-      "amount",
-      "orderId",
-      "checkSum",
-      "buyerEmail",
-      "returnURL",
-      "accName",
+      { name: "appId", key: "appId" },
+      { name: "currency", key: "currency" },
+      { name: "amount", key: "amount" },
+      { name: "orderId", key: "orderId" },
+      { name: "checkSum", key: "signature" },
+      { name: "buyerEmail", key: "customerEmail" },
+      { name: "returnURL", key: "returnUrl" },
+      { name: "accName", key: "customerName" },
+      { name: "buyerPhone", key: "customerPhone" },
+      { name: "callbackURL", key: "callbackUrl" },
     ]
 
-    fields.forEach((field) => {
-      if (session.data[field]) {
+    fields.forEach(({ name, key }) => {
+      if (session.data[key]) {
         const input = document.createElement("input")
         input.type = "hidden"
-        input.name = field
-        input.value = String(session.data[field])
+        input.name = name
+        input.value = String(session.data[key])
         form.appendChild(input)
       }
     })
