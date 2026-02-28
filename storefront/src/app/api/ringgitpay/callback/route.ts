@@ -9,6 +9,12 @@ export async function POST(req: NextRequest) {
         // Parse the form data from the POST request
         const formData = await req.formData()
 
+        // Detailed logging for UAT Sign-Off 
+        console.log("=========================================")
+        console.log("✅ RAW RINGGITPAY REDIRECT RESPONSE DATA ✅")
+        console.log(JSON.stringify(Object.fromEntries(formData.entries()), null, 2))
+        console.log("=========================================")
+
         // Extract RinggitPay response fields
         const rpStatusCode = formData.get("rp_statusCode")?.toString() || ""
         const rpStatusMsg = formData.get("rp_statusMsg")?.toString() || ""

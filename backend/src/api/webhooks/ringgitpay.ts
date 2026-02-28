@@ -30,7 +30,12 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
         // Get normalized webhook result
         const result = await ringgitpayService.getWebhookActionAndData(payload)
 
-        console.log("✅ RinggitPay webhook received:", JSON.stringify(result, null, 2))
+        console.log("=========================================")
+        console.log("✅ RAW RINGGITPAY WEBHOOK RESPONSE DATA ✅")
+        console.log(JSON.stringify(req.body, null, 2))
+        console.log("=========================================")
+
+        console.log("✅ Parsed Action:", JSON.stringify(result, null, 2))
 
         /**
          * Map RinggitPay → Medusa payment session status
