@@ -9,6 +9,9 @@ type Props = {
   params: { countryCode: string; handle: string }
 }
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export async function generateStaticParams() {
   try {
     const countryCodes = await listRegions().then(
