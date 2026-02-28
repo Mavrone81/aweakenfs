@@ -87,10 +87,8 @@ class RinggitPayProviderService extends AbstractPaymentProvider<Options> {
         // Derive country code from currency for redirection
         const countryCode = currency_code.toLowerCase() === "myr" ? "my" : (currency_code.toLowerCase() === "sgd" ? "sg" : "my");
 
-        // Use checkout review for temp orders to allow cart completion, same as HitPay
-        const returnURL = orderId.startsWith("temp_")
-            ? `${storefrontURL}/${countryCode}/checkout?step=review${cartId ? `&cart_id=${cartId}` : ""}`
-            : `${storefrontURL}/${countryCode}/order/confirmed/${orderId}`;
+        // RinggitPay sends a form POST on return. We point to a Next.js API route to intercept it.
+        const returnURL = `${storefrontURL}/api/ringgitpay/callback?countryCode=${countryCode}&cart_id=${cartId}`;
 
         return {
             id: orderId,

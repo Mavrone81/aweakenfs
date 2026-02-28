@@ -40,49 +40,7 @@ export default async function Checkout({
   searchParams: { [key: string]: string | string[] | undefined }
 }) {
   const { countryCode } = params
-  const rpStatusCode = searchParams.rp_statusCode
   const cartIdParam = searchParams.cart_id as string | undefined
-
-  // 1. Handle Success Redirect from RinggitPay
-  if (rpStatusCode === "RP00" && cartIdParam) {
-    try {
-      // Try to complete the cart if it's not already completed
-      const cartRes = await sdk.store.cart
-        .complete(cartIdParam, {}, getAuthHeaders())
-        .catch(() => null)
-
-      if (cartRes?.type === "order") {
-        return redirect(`/${countryCode}/order/confirmed/${cartRes.order.id}`)
-      }
-
-      // If cart is already completed by webhook, find the most recent order 
-      // (as cart_id filter is not supported by Store API)
-      const authHeaders = getAuthHeaders()
-
-      if (Object.keys(authHeaders).length > 0) {
-        const { orders } = await sdk.store.order.list(
-          {
-            limit: 1,
-            fields: "+created_at",
-            // @ts-ignore
-            order: "-created_at"
-          },
-          authHeaders
-        )
-        if (orders?.length > 0) {
-          return redirect(`/${countryCode}/order/confirmed/${orders[0].id}`)
-        }
-      }
-    } catch (error) {
-      console.error("Error completing cart or finding order:", error)
-    }
-  }
-
-  // 2. Handle Failure Redirect from RinggitPay
-  if (rpStatusCode && rpStatusCode !== "RP00") {
-    const errorMsg = searchParams.rp_statusMsg || "Payment was unsuccessful"
-    return redirect(`/${countryCode}/order/failed?reason=${encodeURIComponent(errorMsg as string)}`)
-  }
 
   const cart = await fetchCart()
   const customer = await getCustomer()
