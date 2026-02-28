@@ -81,8 +81,10 @@ class RinggitPayProviderService extends AbstractPaymentProvider<Options> {
         const sourceString = `${this.options_.appId}|${currency_code.toUpperCase()}|${amountString}|${orderId}|${this.options_.requestKey}`;
         const checkSum = this.generateChecksum(sourceString);
 
-        // Map frontend return URL
-        const storefrontURL = process.env.STORE_URL ? (process.env.STORE_URL.startsWith('http') ? process.env.STORE_URL : `https://${process.env.STORE_URL}`) : "http://localhost:8000";
+        // Map frontend return URL and sanitize it just in case there are quotes or trailing slashes
+        let rawStoreUrl = process.env.STORE_URL || process.env.MEDUSA_FRONTEND_URL || "http://localhost:8000";
+        rawStoreUrl = rawStoreUrl.replace(/^["']|["']$/g, '').replace(/\/+$/, '');
+        const storefrontURL = rawStoreUrl.startsWith('http') ? rawStoreUrl : `https://${rawStoreUrl}`;
 
         // Derive country code from currency for redirection
         const countryCode = currency_code.toLowerCase() === "myr" ? "my" : (currency_code.toLowerCase() === "sgd" ? "sg" : "my");
