@@ -17,8 +17,12 @@ export async function POST(req: NextRequest) {
         const amount = formData.get("rp_amount")?.toString() || ""
 
         // Build the redirect URL with the extracted parameters as query strings
-        // so the Next.js page can read them.
-        const baseUrl = req.nextUrl.origin
+        // so the Next.js page can read them. Using headers to avoid internal proxy localhost URLs.
+        const forwardedHost = req.headers.get("x-forwarded-host") || req.headers.get("host")
+        const forwardedProto = req.headers.get("x-forwarded-proto") || "https"
+        const fallbackUrl = process.env.NEXT_PUBLIC_MEDUSA_FRONTEND_URL || "http://localhost:8000"
+
+        const baseUrl = forwardedHost ? `${forwardedProto}://${forwardedHost}` : fallbackUrl
 
         if (rpStatusCode === "RP00") {
             // Payment Success
