@@ -1,6 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
-import HitpayPaymentProviderService from "../../modules/hitpay/service"
+import HitpayPaymentProviderService from "../../../modules/hitpay/service"
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {

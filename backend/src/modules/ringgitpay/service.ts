@@ -73,7 +73,8 @@ class RinggitPayProviderService extends AbstractPaymentProvider<Options> {
 
         const orderId = String(paymentData?.order_id || `temp_${Date.now()}`);
         const cartId = context.resource_id || (paymentData as any)?.cart_id || "";
-        const email = context.email || (paymentData as any)?.customer?.email || "";
+        // Widen fallback to handle Medusa V2 cart shapes, especially for guest checkout
+        const email = context.email || (context as any).cart?.email || (context as any).customer?.email || (paymentData as any)?.email || (paymentData as any)?.cart?.email || (paymentData as any)?.customer?.email || "";
 
         // RinggitPay requires amount in decimal format (e.g., 100.00)
         const amountString = Number(amount).toFixed(2);

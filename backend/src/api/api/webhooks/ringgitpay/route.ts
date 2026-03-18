@@ -1,12 +1,12 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
-import RinggitPayProviderService from "../../modules/ringgitpay/service"
+import RinggitPayProviderService from "../../../../modules/ringgitpay/service"
 import {
     RINGGITPAY_APP_ID,
     RINGGITPAY_REQUEST_KEY,
     RINGGITPAY_RESPONSE_KEY,
     RINGGITPAY_IS_SANDBOX
-} from "../../lib/constants"
+} from "../../../../lib/constants"
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     try {
