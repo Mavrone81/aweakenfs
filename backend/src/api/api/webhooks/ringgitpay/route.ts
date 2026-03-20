@@ -1,5 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { Modules } from "@medusajs/framework/utils"
+import { Modules, ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { completeCartWorkflow } from "@medusajs/medusa/core-flows"
 import RinggitPayProviderService from "../../../../modules/ringgitpay/service"
 import {
     RINGGITPAY_APP_ID,
@@ -11,7 +12,7 @@ import {
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     try {
         const container = req.scope
-
+        const query = container.resolve(ContainerRegistrationKeys.QUERY)
         const paymentModuleService = container.resolve(Modules.PAYMENT)
 
         const ringgitpayService = new RinggitPayProviderService(container, {
@@ -55,26 +56,110 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
                 break
         }
 
+        const referenceId = result.data.session_id as string
+
         /**
-         * SAFE: Ensure session_id exists
+         * SAFE: Ensure referenceId exists
          */
-        if (!result.data.session_id) {
-            console.warn("⚠️ RinggitPay webhook missing session_id. Skipping update.")
+        if (!referenceId) {
+            console.warn("⚠️ RinggitPay webhook missing orderId/referenceId. Skipping update.")
             res.status(200).json({ received: true })
             return
         }
 
-        console.log(`🔄 Updating Medusa payment_session: ${result.data.session_id}`)
+        console.log(`🔄 Processing RinggitPay reference: ${referenceId}`)
 
-        const paymentSession = await paymentModuleService.retrievePaymentSession(result.data.session_id as string)
+        let cartId: string | undefined
+        let sessionId: string | undefined
 
-        await paymentModuleService.updatePaymentSession({
-            id: result.data.session_id as string,
-            data: result.data,
-            status: status as any,
-            currency_code: paymentSession.currency_code,
-            amount: result.data.amount as any,
-        })
+        // Resolve Cart ID and Session ID based on the prefix
+        if (referenceId.startsWith("cart_")) {
+            cartId = referenceId
+            console.log(`📦 Reference is a Cart ID: ${cartId}`)
+            
+            // Find the payment session for this cart
+            const { data: [cartData] } = await query.graph({
+                entity: "cart",
+                fields: ["id", "completed_at", "payment_collection.payment_sessions.id", "payment_collection.payment_sessions.provider_id"],
+                filters: { id: cartId }
+            })
+            
+            if (cartData) {
+                const rpSession = cartData.payment_collection?.payment_sessions?.find((s: any) => s.provider_id === "ringgitpay")
+                sessionId = rpSession?.id
+                if (!sessionId) {
+                    console.warn(`⚠️ Could not find RinggitPay session for Cart: ${cartId}`)
+                }
+            }
+        } else if (referenceId.startsWith("paysess_")) {
+            sessionId = referenceId
+            console.log(`💳 Reference is a Payment Session ID: ${sessionId}`)
+        } else {
+            // Fallback for temp_ IDs or others
+            sessionId = referenceId
+            console.log(`❓ Reference is a generic ID: ${sessionId}`)
+        }
+
+        if (sessionId) {
+            console.log(`🔄 Updating Medusa payment_session: ${sessionId}`)
+            const paymentSession = await paymentModuleService.retrievePaymentSession(sessionId)
+            await paymentModuleService.updatePaymentSession({
+                id: sessionId,
+                data: result.data,
+                status: status as any,
+                currency_code: paymentSession.currency_code,
+                amount: result.data.amount as any,
+            })
+        }
+
+        /**
+         * COMPLETE CART: If payment was successful, attempt to create the order
+         */
+        if (status === "captured" || status === "authorized") {
+            try {
+                // If we don't have a cartId yet (e.g. we started with a sessionId), find it now
+                if (!cartId && sessionId) {
+                    console.log(`🔍 Finding Cart for Payment Session: ${sessionId}`)
+                    const { data: [cartData] } = await query.graph({
+                        entity: "cart",
+                        fields: ["id", "completed_at"],
+                        filters: {
+                            payment_collection: {
+                                payment_sessions: {
+                                    id: sessionId
+                                }
+                            }
+                        }
+                    })
+                    cartId = cartData?.id
+                }
+
+                if (cartId) {
+                    // Check if already completed to avoid redundant workflow calls
+                    const { data: [finalCart] } = await query.graph({
+                        entity: "cart",
+                        fields: ["id", "completed_at"],
+                        filters: { id: cartId }
+                    })
+
+                    if (finalCart && !finalCart.completed_at) {
+                        console.log(`🚀 Triggering completeCartWorkflow for Cart: ${cartId}`)
+                        await completeCartWorkflow(container).run({
+                            input: {
+                                id: cartId
+                            }
+                        })
+                        console.log(`✅ Order successfully created for Cart: ${cartId}`)
+                    } else if (finalCart?.completed_at) {
+                        console.log(`ℹ️ Cart ${cartId} already completed. Skipping workflow.`)
+                    }
+                } else {
+                    console.warn(`⚠️ Could not determine Cart ID for reference ${referenceId}`)
+                }
+            } catch (workflowError: any) {
+                console.error("❌ Failed to complete cart via workflow:", workflowError.message)
+            }
+        }
 
         res.status(200).json({ received: true })
 
