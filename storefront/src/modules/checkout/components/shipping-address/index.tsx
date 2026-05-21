@@ -49,14 +49,15 @@ const ShippingAddress = ({
         "shipping_address.city": address?.city || "",
         "shipping_address.country_code": address?.country_code || "",
         "shipping_address.province": address?.province || "",
-        // "shipping_address.phone": address?.phone || "",
+        "shipping_address.phone":  "",
+        "shipping_address.email": "",
       }))
 
-    // email &&
-    //   setFormData((prevState: Record<string, any>) => ({
-    //     ...prevState,
-    //     email: email,
-    //   }))
+    email &&
+      setFormData((prevState: Record<string, any>) => ({
+        ...prevState,
+        email: email,
+      }))
   }
 
   useEffect(() => {
