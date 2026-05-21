@@ -121,7 +121,7 @@ const Addresses = ({
                     </Text>
                   </div>
 
-                  <div
+                  {/* <div
                     className="flex flex-col w-1/3 "
                     data-testid="shipping-contact-summary"
                   >
@@ -134,7 +134,7 @@ const Addresses = ({
                     <Text className="txt-medium text-ui-fg-subtle">
                       {cart.email}
                     </Text>
-                  </div>
+                  </div> */}
 
                   <div
                     className="flex flex-col w-1/3"
