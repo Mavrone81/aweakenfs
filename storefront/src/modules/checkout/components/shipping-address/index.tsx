@@ -107,7 +107,7 @@ const ShippingAddress = ({
           autoComplete="given-name"
           value={formData["shipping_address.first_name"]}
           onChange={handleChange}
-          required
+          // required
           data-testid="shipping-first-name-input"
         />
         <Input
@@ -116,7 +116,7 @@ const ShippingAddress = ({
           autoComplete="family-name"
           value={formData["shipping_address.last_name"]}
           onChange={handleChange}
-          required
+          // required
           data-testid="shipping-last-name-input"
         />
         <Input
@@ -125,7 +125,7 @@ const ShippingAddress = ({
           autoComplete="address-line1"
           value={formData["shipping_address.address_1"]}
           onChange={handleChange}
-          required
+          // required
           data-testid="shipping-address-input"
         />
         <Input
@@ -142,7 +142,7 @@ const ShippingAddress = ({
           autoComplete="postal-code"
           value={formData["shipping_address.postal_code"]}
           onChange={handleChange}
-          required
+          // required
           data-testid="shipping-postal-code-input"
         />
         <Input
@@ -151,7 +151,7 @@ const ShippingAddress = ({
           autoComplete="address-level2"
           value={formData["shipping_address.city"]}
           onChange={handleChange}
-          required
+          // required
           data-testid="shipping-city-input"
         />
         <CountrySelect
@@ -160,7 +160,7 @@ const ShippingAddress = ({
           region={cart?.region}
           value={formData["shipping_address.country_code"]}
           onChange={handleChange}
-          required
+          // required
           data-testid="shipping-country-select"
         />
         <Input
@@ -169,7 +169,7 @@ const ShippingAddress = ({
           autoComplete="address-level1"
           value={formData["shipping_address.province"]}
           onChange={handleChange}
-          required
+          // required
           data-testid="shipping-province-input"
         />
       </div>
