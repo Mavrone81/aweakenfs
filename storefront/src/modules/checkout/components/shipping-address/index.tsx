@@ -184,7 +184,7 @@ const ShippingAddress = ({
       </div>
       <div className="grid grid-cols-2 gap-4 mb-4">
         <Input
-          label="Email Address"
+          label="admin@aweakenfs.com"
           name="email"
           title="Enter a valid email address."
           autoComplete="email"
