@@ -184,7 +184,7 @@ const ShippingAddress = ({
       </div>
       <div className="grid grid-cols-2 gap-4 mb-4">
         <Input
-          label=""
+          label="Email Address"
           name="email"
           title="Enter a valid email address."
           autoComplete="email"
@@ -194,7 +194,7 @@ const ShippingAddress = ({
           data-testid="shipping-email-input"
         />
         <Input
-          label=""
+          label="Phone Number"
           name="shipping_address.phone"
           autoComplete="tel"
           value={formData["shipping_address.phone"]}
