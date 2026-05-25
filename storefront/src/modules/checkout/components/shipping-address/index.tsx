@@ -186,7 +186,6 @@ const ShippingAddress = ({
         <Input
           label=""
           name="email"
-          type="hidden"
           title="Enter a valid email address."
           autoComplete="email"
           value={formData.email}
@@ -195,7 +194,6 @@ const ShippingAddress = ({
           data-testid="shipping-email-input"
         />
         <Input
-          type="hidden"
           label=""
           name="shipping_address.phone"
           autoComplete="tel"
