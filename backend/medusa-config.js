@@ -34,6 +34,16 @@ const medusaConfig = {
   projectConfig: {
     databaseUrl: DATABASE_URL,
     databaseLogging: false,
+    // SSL is opt-in via DATABASE_SSL=true (managed/cloud Postgres). For a plain
+    // local/container Postgres (no SSL) leave it unset so the client doesn't
+    // attempt SSL ("server does not support SSL connections").
+    databaseDriverOptions: {
+      connection: {
+        ssl: process.env.DATABASE_SSL === 'true'
+          ? { rejectUnauthorized: false }
+          : false,
+      },
+    },
     redisUrl: REDIS_URL,
     workerMode: WORKER_MODE,
     http: {

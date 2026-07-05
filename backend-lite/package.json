@@ -1,0 +1,33 @@
+{
+  "name": "ecommerce-lite-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Lightweight Medusa-compatible backend (Express + SQLite) for the EcommerceV2 storefront + a minimal admin.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "serve": "node dist/server.js",
+    "seed": "tsx src/seed.ts",
+    "reset": "rm -f data.db data.db-* && tsx src/seed.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^20.17.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,178 @@
+# Docker Compose stack for the EcommerceV2 monorepo (Medusa backend + Next.js storefront).
+#
+#   Core services:     postgres, redis, backend, storefront
+#   Optional (profile "full"):  minio, meilisearch
+#
+# Quick start:
+#   1. cp .env.docker.example .env   (then edit secrets)
+#   2. docker compose up -d --build
+#      -> backend migrates + seeds on first boot, storefront waits, builds, starts
+#   3. Storefront: http://localhost:8000   Admin: http://localhost:9000/app
+#
+# Enable MinIO + MeiliSearch:  docker compose --profile full up -d --build
+#
+# See docs/DOCKER.md for the networking notes (NEXT_PUBLIC_MEDUSA_BACKEND_URL).
+
+name: ecommercev2
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-medusa}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-medusa}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-medusa}
+      # SSL off for the bundled Postgres; set true only for managed/cloud Postgres.
+      DATABASE_SSL: ${DATABASE_SSL:-false}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      COOKIE_SECRET: ${COOKIE_SECRET:?set COOKIE_SECRET in .env}
+      # Public URLs (used to build payment return/webhook URLs)
+      BACKEND_PUBLIC_URL: ${BACKEND_PUBLIC_URL:-http://localhost:9000}
+      STORE_URL: ${STORE_URL:-http://localhost:8000}
+      MEDUSA_BACKEND_URL: ${BACKEND_PUBLIC_URL:-http://localhost:9000}
+      # CORS
+      STORE_CORS: ${STORE_CORS:-http://localhost:8000}
+      ADMIN_CORS: ${ADMIN_CORS:-http://localhost:9000,http://localhost:7001}
+      AUTH_CORS: ${AUTH_CORS:-http://localhost:8000,http://localhost:9000,http://localhost:7001}
+      # Admin bootstrap (created by init-backend seed on first boot)
+      MEDUSA_ADMIN_EMAIL: ${MEDUSA_ADMIN_EMAIL:-admin@example.com}
+      MEDUSA_ADMIN_PASSWORD: ${MEDUSA_ADMIN_PASSWORD:-supersecret}
+      # Payments (optional — leave blank to disable a provider)
+      STRIPE_API_KEY: ${STRIPE_API_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      RINGGITPAY_APP_ID: ${RINGGITPAY_APP_ID:-}
+      RINGGITPAY_REQUEST_KEY: ${RINGGITPAY_REQUEST_KEY:-}
+      RINGGITPAY_RESPONSE_KEY: ${RINGGITPAY_RESPONSE_KEY:-}
+      RINGGITPAY_IS_SANDBOX: ${RINGGITPAY_IS_SANDBOX:-false}
+      HITPAY_API_KEY: ${HITPAY_API_KEY:-}
+      # Email (optional)
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-}
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY:-}
+      SENDGRID_FROM: ${SENDGRID_FROM:-}
+      # File storage (optional — MinIO; falls back to local /static when unset)
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-}
+      MINIO_BUCKET: ${MINIO_BUCKET:-medusa-media}
+      # Search (optional — MeiliSearch)
+      MEILISEARCH_HOST: ${MEILISEARCH_HOST:-}
+      MEILISEARCH_ADMIN_KEY: ${MEILISEARCH_ADMIN_KEY:-}
+      MEILISEARCH_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-}
+    ports:
+      - "${BACKEND_PORT:-9000}:9000"
+    volumes:
+      # Persist locally-stored uploads when MinIO is not configured
+      - backend-uploads:/app/.medusa/server/static
+
+  storefront:
+    build:
+      context: ./storefront
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 8000
+      # IMPORTANT: this URL is baked into the browser bundle AND used by the
+      # container to reach the backend. For production set it to your public API
+      # domain (reachable from both). See docs/DOCKER.md "Networking".
+      NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${NEXT_PUBLIC_MEDUSA_BACKEND_URL:-http://localhost:9000}
+      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-http://localhost:8000}
+      NEXT_PUBLIC_DEFAULT_REGION: ${NEXT_PUBLIC_DEFAULT_REGION:-us}
+      # Optional: provide the key to skip the /key-exchange auto-fetch
+      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:-}
+      # Optional search wiring
+      NEXT_PUBLIC_SEARCH_ENDPOINT: ${NEXT_PUBLIC_SEARCH_ENDPOINT:-}
+      NEXT_PUBLIC_SEARCH_API_KEY: ${NEXT_PUBLIC_SEARCH_API_KEY:-}
+      NEXT_PUBLIC_INDEX_NAME: ${NEXT_PUBLIC_INDEX_NAME:-products}
+      NEXT_PUBLIC_MINIO_ENDPOINT: ${NEXT_PUBLIC_MINIO_ENDPOINT:-}
+      FORCE_REBUILD: ${FORCE_REBUILD:-false}
+    ports:
+      - "${STOREFRONT_PORT:-8000}:8000"
+    volumes:
+      - storefront-next:/app/.next
+
+  # ----- Optional services (profile: full) -----
+  minio:
+    image: minio/minio:latest
+    profiles: ["full"]
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - minio-data:/data
+    ports:
+      - "${MINIO_PORT:-9100}:9000"
+      - "${MINIO_CONSOLE_PORT:-9101}:9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.8
+    profiles: ["full"]
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: ${MEILISEARCH_MASTER_KEY:-masterKey123456}
+      MEILI_NO_ANALYTICS: "true"
+    volumes:
+      - meili-data:/meili_data
+    ports:
+      - "${MEILISEARCH_PORT:-7700}:7700"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
+  redis-data:
+  backend-uploads:
+  storefront-next:
+  minio-data:
+  meili-data:

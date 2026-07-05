@@ -20,12 +20,9 @@ const PaymentButton: React.FC<PaymentButtonProps> = ({
   cart,
   "data-testid": dataTestId,
 }) => {
-  const notReady =
-    !cart ||
-    !cart.shipping_address ||
-    !cart.billing_address ||
-    !cart.email ||
-    (cart.shipping_methods?.length ?? 0) < 1
+  // Customer details (shipping/billing address, email) are optional. Only require
+  // a cart with a selected delivery method so the order carries a shipping cost.
+  const notReady = !cart || (cart.shipping_methods?.length ?? 0) < 1
 
   // TODO: Add this once gift cards are implemented
   // const paidByGiftcard =

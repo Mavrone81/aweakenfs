@@ -1,0 +1,39 @@
+# Production override for the lite stack on awakenfs.store.
+#   docker compose -f docker-compose.lite.yml -f docker-compose.lite.prod.yml up -d --build
+#
+# - Publishes both containers to 127.0.0.1 ONLY (host Nginx terminates TLS and
+#   proxies in; nothing is exposed to the public network directly).
+# - Maps the storefront's server-side calls to https://awakenfs.store back to the
+#   host's Nginx (host-gateway), so SSR/await-backend works even before public DNS
+#   propagates and avoids a public hairpin. The TLS cert is valid for the name, so
+#   verification passes.
+# - Bakes the Next.js build into the storefront IMAGE (build args below feed the
+#   ARG/ENV block in storefront/Dockerfile) so a reboot/restart serves instantly
+#   instead of spending ~4 min in `next build` behind a 502. The storefront-next
+#   volume is overridden away — it would shadow the baked /app/.next.
+#   NOTE: after changing any NEXT_PUBLIC_* value in .env, re-run with --build
+#   (FORCE_REBUILD no longer applies; the build lives in the image now).
+
+services:
+  backend:
+    ports: !override
+      - "127.0.0.1:${BACKEND_PORT:-9000}:9000"
+    environment:
+      # Key returned by /key-exchange — keep in sync with the storefront's pinned key.
+      PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:-pk_lite_storefront_key}
+
+  storefront:
+    build:
+      context: ./storefront
+      args:
+        NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${NEXT_PUBLIC_MEDUSA_BACKEND_URL:-http://localhost:9000}
+        NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:-pk_lite_storefront_key}
+        NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-http://localhost:8000}
+        NEXT_PUBLIC_DEFAULT_REGION: ${NEXT_PUBLIC_DEFAULT_REGION:-us}
+        NEXT_PUBLIC_MINIO_ENDPOINT: ${NEXT_PUBLIC_MINIO_ENDPOINT:-}
+    ports: !override
+      - "127.0.0.1:${STOREFRONT_PORT:-8000}:8000"
+    volumes: !override []
+    extra_hosts:
+      - "awakenfs.store:host-gateway"
+      - "www.awakenfs.store:host-gateway"

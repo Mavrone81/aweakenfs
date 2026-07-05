@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lite Admin</title>
+<style>
+  :root { --bg:#0f1115; --panel:#181b22; --panel2:#1f232c; --border:#2a2f3a; --fg:#e6e8eb; --muted:#9aa3af; --accent:#6366f1; --accent2:#4f46e5; --danger:#ef4444; --ok:#22c55e; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--fg); font-size:14px; }
+  a { color:var(--accent); }
+  header { display:flex; align-items:center; gap:16px; padding:12px 20px; background:var(--panel); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:10; }
+  header h1 { font-size:16px; margin:0; font-weight:600; }
+  nav { display:flex; gap:4px; }
+  nav button { background:transparent; border:none; color:var(--muted); padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; }
+  nav button.active { background:var(--panel2); color:var(--fg); }
+  .spacer { flex:1; }
+  main { padding:20px; max-width:1100px; margin:0 auto; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:16px; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  input, select, textarea { background:var(--panel2); border:1px solid var(--border); color:var(--fg); border-radius:8px; padding:8px 10px; font-size:14px; width:100%; }
+  textarea { min-height:70px; resize:vertical; }
+  label { display:block; font-size:12px; color:var(--muted); margin:8px 0 4px; }
+  button.btn { background:var(--accent); color:#fff; border:none; border-radius:8px; padding:8px 14px; cursor:pointer; font-weight:500; }
+  button.btn:hover { background:var(--accent2); }
+  button.ghost { background:transparent; border:1px solid var(--border); color:var(--fg); }
+  button.danger { background:transparent; border:1px solid var(--danger); color:var(--danger); }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  th { color:var(--muted); font-weight:500; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; background:var(--panel2); border:1px solid var(--border); }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .muted { color:var(--muted); }
+  .thumb { width:42px; height:42px; border-radius:8px; object-fit:cover; background:var(--panel2); }
+  dialog { background:var(--panel); color:var(--fg); border:1px solid var(--border); border-radius:14px; padding:0; width:min(680px,94vw); }
+  dialog::backdrop { background:rgba(0,0,0,.6); }
+  .dlg-head { display:flex; align-items:center; justify-content:space-between; padding:16px; border-bottom:1px solid var(--border); }
+  .dlg-body { padding:16px; max-height:70vh; overflow:auto; }
+  .dlg-foot { padding:12px 16px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px; }
+  .login-wrap { max-width:360px; margin:12vh auto; }
+  .toast { position:fixed; bottom:20px; right:20px; background:var(--panel2); border:1px solid var(--border); padding:12px 16px; border-radius:10px; opacity:0; transition:.2s; }
+  .toast.show { opacity:1; }
+  .toast.err { border-color:var(--danger); }
+  .price-row { display:grid; grid-template-columns:60px 1fr 80px; gap:8px; align-items:center; margin-bottom:6px; }
+  .chk { display:inline-flex; align-items:center; gap:6px; margin-right:14px; }
+  .chk input { width:auto; }
+  small.code { font-family:ui-monospace,monospace; color:var(--muted); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+
+<script>
+const API = location.origin
+let token = localStorage.getItem("lite_admin_token") || ""
+
+function toast(msg, isErr) {
+  const t = document.getElementById("toast")
+  t.textContent = msg
+  t.className = "toast show" + (isErr ? " err" : "")
+  setTimeout(() => (t.className = "toast"), 2600)
+}
+
+async function api(path, opts = {}) {
+  const res = await fetch(API + path, {
+    ...opts,
+    headers: { "Content-Type": "application/json", ...(token ? { Authorization: "Bearer " + token } : {}), ...(opts.headers || {}) },
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  })
+  if (res.status === 401) { token = ""; localStorage.removeItem("lite_admin_token"); renderLogin(); throw new Error("Unauthorized") }
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) { toast(data.message || "Request failed", true); throw new Error(data.message || "error") }
+  return data
+}
+
+const el = (html) => { const d = document.createElement("div"); d.innerHTML = html.trim(); return d.firstElementChild }
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;" }[c]))
+const money = (a, c) => new Intl.NumberFormat("en-US", { style:"currency", currency:(c||"usd").toUpperCase() }).format(a||0)
+
+// ---------------- LOGIN ----------------
+function renderLogin() {
+  document.getElementById("app").innerHTML = ""
+  const wrap = el(`<div class="login-wrap"><div class="card">
+    <h1 style="margin-top:0">Lite Admin</h1>
+    <label>Email</label><input id="le" value="admin@example.com" />
+    <label>Password</label><input id="lp" type="password" value="supersecret" />
+    <div style="height:14px"></div>
+    <button class="btn" id="lbtn" style="width:100%">Sign in</button>
+  </div></div>`)
+  document.getElementById("app").appendChild(wrap)
+  document.getElementById("lbtn").onclick = async () => {
+    try {
+      const r = await fetch(API + "/auth/user/emailpass", { method:"POST", headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ email: document.getElementById("le").value, password: document.getElementById("lp").value }) })
+      const d = await r.json()
+      if (!r.ok) return toast(d.message || "Login failed", true)
+      token = d.token; localStorage.setItem("lite_admin_token", token); renderApp()
+    } catch (e) { toast("Login error", true) }
+  }
+}
+
+// ---------------- SHELL ----------------
+let activeTab = "products"
+const TABS = [["products","Products"],["regions","Regions & Payments"],["shipping","Shipping"],["orders","Orders"]]
+function renderApp() {
+  document.getElementById("app").innerHTML = ""
+  const header = el(`<header>
+    <h1>🛍️ Lite Admin</h1>
+    <nav>${TABS.map(([k,l]) => `<button data-tab="${k}" class="${k===activeTab?'active':''}">${l}</button>`).join("")}</nav>
+    <div class="spacer"></div>
+    <button class="ghost" id="logout">Logout</button>
+  </header>`)
+  const main = el(`<main id="main"></main>`)
+  document.getElementById("app").append(header, main)
+  header.querySelectorAll("nav button").forEach(b => b.onclick = () => { activeTab = b.dataset.tab; renderApp() })
+  document.getElementById("logout").onclick = () => { token=""; localStorage.removeItem("lite_admin_token"); renderLogin() }
+  if (activeTab==="products") renderProducts(main)
+  else if (activeTab==="regions") renderRegions(main)
+  else if (activeTab==="shipping") renderShipping(main)
+  else if (activeTab==="orders") renderOrders(main)
+}
+
+// ---------------- PRODUCTS ----------------
+async function renderProducts(main) {
+  main.innerHTML = `<div class="row" style="justify-content:space-between"><h2>Products</h2><button class="btn" id="newp">+ New product</button></div><div class="card"><table id="ptable"><thead><tr><th></th><th>Title</th><th>Handle</th><th>Status</th><th>Variants</th><th></th></tr></thead><tbody></tbody></table></div>`
+  document.getElementById("newp").onclick = () => editProduct(null)
+  const { products } = await api("/admin/products")
+  const tb = main.querySelector("#ptable tbody")
+  tb.innerHTML = products.map(p => `<tr>
+    <td><img class="thumb" src="${esc(p.thumbnail||"")}" onerror="this.style.visibility='hidden'"/></td>
+    <td>${esc(p.title)}</td><td><small class="code">${esc(p.handle)}</small></td>
+    <td><span class="pill">${esc(p.status)}</span></td>
+    <td>${p.variants.length}</td>
+    <td style="text-align:right"><button class="ghost" data-edit="${p.id}">Edit</button> <button class="danger" data-del="${p.id}">Delete</button></td>
+  </tr>`).join("") || `<tr><td colspan="6" class="muted">No products yet.</td></tr>`
+  tb.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => editProduct(products.find(p=>p.id===b.dataset.edit)))
+  tb.querySelectorAll("[data-del]").forEach(b => b.onclick = async () => { if(confirm("Delete product?")){ await api("/admin/products/"+b.dataset.del,{method:"DELETE"}); toast("Deleted"); renderProducts(main) } })
+}
+
+async function editProduct(p) {
+  const isNew = !p
+  const collections = (await api("/admin/collections")).collections
+  const dlg = el(`<dialog><form method="dialog">
+    <div class="dlg-head"><strong>${isNew?"New product":"Edit product"}</strong><button class="ghost" value="cancel">✕</button></div>
+    <div class="dlg-body">
+      <div class="grid2">
+        <div><label>Title</label><input id="f_title" value="${esc(p?.title||"")}"></div>
+        <div><label>Handle</label><input id="f_handle" value="${esc(p?.handle||"")}" placeholder="auto"></div>
+      </div>
+      <label>Description</label><textarea id="f_desc">${esc(p?.description||"")}</textarea>
+      <div class="grid2">
+        <div><label>Thumbnail URL</label><input id="f_thumb" value="${esc(p?.thumbnail||"")}"></div>
+        <div><label>Status</label><select id="f_status"><option ${p?.status==="published"?"selected":""}>published</option><option ${p?.status==="draft"?"selected":""}>draft</option></select></div>
+      </div>
+      <label>Collection</label><select id="f_col"><option value="">—</option>${collections.map(c=>`<option value="${c.id}" ${p?.collection_id===c.id?"selected":""}>${esc(c.title)}</option>`).join("")}</select>
+      <div id="variants_area"></div>
+    </div>
+    <div class="dlg-foot"><button class="ghost" value="cancel">Close</button><button class="btn" id="savep">Save</button></div>
+  </form></dialog>`)
+  document.body.appendChild(dlg); dlg.showModal()
+  dlg.addEventListener("close", () => dlg.remove())
+
+  const save = async () => {
+    const body = { title:val("f_title"), handle:val("f_handle")||undefined, description:val("f_desc"), thumbnail:val("f_thumb"), status:val("f_status"), collection_id:val("f_col")||null }
+    if (isNew) { const r = await api("/admin/products",{method:"POST",body}); toast("Created"); dlg.close(); renderApp(); }
+    else { await api("/admin/products/"+p.id,{method:"POST",body}); toast("Saved"); }
+  }
+  dlg.querySelector("#savep").onclick = (e)=>{ e.preventDefault(); save() }
+  if (!isNew) renderVariants(dlg.querySelector("#variants_area"), p)
+  else dlg.querySelector("#variants_area").innerHTML = `<p class="muted" style="margin-top:14px">Save the product, then reopen it to add variants & prices.</p>`
+}
+
+function val(id){ return document.getElementById(id).value }
+
+async function renderVariants(area, p) {
+  const fresh = (await api("/admin/products/"+p.id)).product
+  const regions = (await api("/admin/regions")).regions
+  const currencies = [...new Set(regions.map(r=>r.currency_code))]
+  area.innerHTML = `<div class="row" style="justify-content:space-between;margin-top:16px"><strong>Variants & Prices</strong><button class="ghost" id="addv">+ Add variant</button></div>
+    <div id="vlist"></div>`
+  const list = area.querySelector("#vlist")
+  list.innerHTML = fresh.variants.map(v => `<div class="card" style="background:var(--panel2)">
+    <div class="row" style="justify-content:space-between">
+      <div class="row"><div><label>Title</label><input data-vt="${v.id}" value="${esc(v.title)}" style="width:130px"></div>
+      <div><label>SKU</label><input data-vs="${v.id}" value="${esc(v.sku||"")}" style="width:130px"></div>
+      <div><label>Stock</label><input data-vi="${v.id}" type="number" value="${v.inventory_quantity}" style="width:80px"></div></div>
+      <div class="row"><button class="ghost" data-vsave="${v.id}">Save</button><button class="danger" data-vdel="${v.id}">✕</button></div>
+    </div>
+    <label>Prices</label>
+    ${currencies.map(c => { const pr = v.prices.find(x=>x.currency_code===c); return `<div class="price-row"><span class="pill">${c.toUpperCase()}</span><input data-vp="${v.id}:${c}" type="number" step="0.01" value="${pr?pr.amount:""}" placeholder="0.00"><button class="ghost" data-psave="${v.id}:${c}">Set</button></div>` }).join("")}
+  </div>`).join("") || `<p class="muted">No variants.</p>`
+
+  area.querySelector("#addv").onclick = async () => {
+    const title = prompt("Variant title (e.g. Size M):","Default"); if(title===null) return
+    await api(`/admin/products/${p.id}/variants`,{method:"POST",body:{title,inventory_quantity:100}}); renderVariants(area,p)
+  }
+  list.querySelectorAll("[data-vsave]").forEach(b=>b.onclick=async()=>{ const id=b.dataset.vsave; await api("/admin/variants/"+id,{method:"POST",body:{title:document.querySelector(`[data-vt="${id}"]`).value,sku:document.querySelector(`[data-vs="${id}"]`).value,inventory_quantity:Number(document.querySelector(`[data-vi="${id}"]`).value)}}); toast("Variant saved") })
+  list.querySelectorAll("[data-vdel]").forEach(b=>b.onclick=async()=>{ if(confirm("Delete variant?")){ await api("/admin/variants/"+b.dataset.vdel,{method:"DELETE"}); renderVariants(area,p) } })
+  list.querySelectorAll("[data-psave]").forEach(b=>b.onclick=async()=>{ const [vid,cur]=b.dataset.psave.split(":"); const amt=Number(document.querySelector(`[data-vp="${vid}:${cur}"]`).value); await api(`/admin/variants/${vid}/prices`,{method:"POST",body:{currency_code:cur,amount:amt}}); toast(`${cur.toUpperCase()} price set`) })
+}
+
+// ---------------- REGIONS & PAYMENTS ----------------
+async function renderRegions(main) {
+  main.innerHTML = `<div class="row" style="justify-content:space-between"><h2>Regions & Payment Modes</h2><button class="btn" id="newr">+ New region</button></div><div id="rlist"></div>`
+  const { regions } = await api("/admin/regions")
+  const { payment_providers } = await api("/admin/payment-providers")
+  document.getElementById("newr").onclick = async () => { const name=prompt("Region name:"); if(!name) return; const cur=prompt("Currency (e.g. usd):","usd"); if(!cur) return; await api("/admin/regions",{method:"POST",body:{name,currency_code:cur}}); renderRegions(main) }
+  const list = document.getElementById("rlist")
+  list.innerHTML = regions.map(r => `<div class="card">
+    <div class="grid2">
+      <div><label>Name</label><input data-rn="${r.id}" value="${esc(r.name)}"></div>
+      <div><label>Currency</label><input data-rc="${r.id}" value="${esc(r.currency_code)}" style="width:90px"></div>
+    </div>
+    <label>Payment modes</label>
+    <div class="row">${payment_providers.map(pp=>`<label class="chk"><input type="checkbox" data-pp="${r.id}:${pp.id}" ${r.payment_providers.includes(pp.id)?"checked":""}> ${esc(pp.id.replace("pp_","").replace(/_/g," "))}</label>`).join("")}</div>
+    <label>Countries</label>
+    <div class="row" style="gap:6px" id="ctry_${r.id}">${r.countries.map(c=>`<span class="pill">${esc(c.iso_2.toUpperCase())} <a href="#" data-cdel="${r.id}:${c.iso_2}">✕</a></span>`).join("")} <input data-cadd="${r.id}" placeholder="add iso2" style="width:90px"></div>
+    <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="danger" data-rdel="${r.id}">Delete</button><button class="btn" data-rsave="${r.id}">Save region</button></div>
+  </div>`).join("")
+
+  list.querySelectorAll("[data-rsave]").forEach(b=>b.onclick=async()=>{ const id=b.dataset.rsave; await api("/admin/regions/"+id,{method:"POST",body:{name:document.querySelector(`[data-rn="${id}"]`).value,currency_code:document.querySelector(`[data-rc="${id}"]`).value}}); toast("Region saved") })
+  list.querySelectorAll("[data-rdel]").forEach(b=>b.onclick=async()=>{ if(confirm("Delete region?")){ await api("/admin/regions/"+b.dataset.rdel,{method:"DELETE"}); renderRegions(main) } })
+  list.querySelectorAll("[data-pp]").forEach(cb=>cb.onclick=async()=>{ const [rid,pid]=cb.dataset.pp.split(":"); if(cb.checked) await api(`/admin/regions/${rid}/payment-providers`,{method:"POST",body:{provider_id:pid}}); else await api(`/admin/regions/${rid}/payment-providers/${pid}`,{method:"DELETE"}); toast("Payment mode updated") })
+  list.querySelectorAll("[data-cdel]").forEach(a=>a.onclick=async(e)=>{ e.preventDefault(); const [rid,iso]=a.dataset.cdel.split(":"); await api(`/admin/regions/${rid}/countries/${iso}`,{method:"DELETE"}); renderRegions(main) })
+  list.querySelectorAll("[data-cadd]").forEach(inp=>inp.onkeydown=async(e)=>{ if(e.key==="Enter"){ const rid=inp.dataset.cadd; await api(`/admin/regions/${rid}/countries`,{method:"POST",body:{iso_2:inp.value}}); renderRegions(main) } })
+}
+
+// ---------------- SHIPPING ----------------
+async function renderShipping(main) {
+  const { regions } = await api("/admin/regions")
+  const { shipping_options } = await api("/admin/shipping-options")
+  main.innerHTML = `<div class="row" style="justify-content:space-between"><h2>Shipping Options</h2></div>
+   <div class="card"><strong>Add option</strong>
+     <div class="row" style="margin-top:8px">
+       <input id="s_name" placeholder="Name (e.g. Express)" style="width:200px">
+       <select id="s_region"><option value="">All regions</option>${regions.map(r=>`<option value="${r.id}">${esc(r.name)} (${r.currency_code.toUpperCase()})</option>`).join("")}</select>
+       <input id="s_amt" type="number" step="0.01" placeholder="amount" style="width:120px">
+       <button class="btn" id="s_add">Add</button>
+     </div></div>
+   <div class="card"><table><thead><tr><th>Name</th><th>Region</th><th>Amount</th><th></th></tr></thead><tbody id="stb"></tbody></table></div>`
+  const rname = (id)=>{ const r=regions.find(x=>x.id===id); return r?`${r.name} (${r.currency_code.toUpperCase()})`:"All" }
+  document.getElementById("stb").innerHTML = shipping_options.map(o=>`<tr><td>${esc(o.name)}</td><td>${esc(rname(o.region_id))}</td><td><input data-sa="${o.id}" type="number" step="0.01" value="${o.amount}" style="width:100px"></td><td style="text-align:right"><button class="ghost" data-ssave="${o.id}">Save</button> <button class="danger" data-sdel="${o.id}">Delete</button></td></tr>`).join("") || `<tr><td colspan="4" class="muted">None</td></tr>`
+  document.getElementById("s_add").onclick = async ()=>{ await api("/admin/shipping-options",{method:"POST",body:{name:val("s_name"),region_id:val("s_region")||null,amount:Number(val("s_amt"))}}); toast("Added"); renderShipping(main) }
+  main.querySelectorAll("[data-ssave]").forEach(b=>b.onclick=async()=>{ await api("/admin/shipping-options/"+b.dataset.ssave,{method:"POST",body:{amount:Number(document.querySelector(`[data-sa="${b.dataset.ssave}"]`).value)}}); toast("Saved") })
+  main.querySelectorAll("[data-sdel]").forEach(b=>b.onclick=async()=>{ if(confirm("Delete?")){ await api("/admin/shipping-options/"+b.dataset.sdel,{method:"DELETE"}); renderShipping(main) } })
+}
+
+// ---------------- ORDERS ----------------
+async function renderOrders(main) {
+  const { orders } = await api("/admin/orders")
+  main.innerHTML = `<h2>Orders</h2><div class="card"><table><thead><tr><th>#</th><th>Email</th><th>Status</th><th>Payment</th><th>Total</th><th>Date</th></tr></thead>
+   <tbody>${orders.map(o=>`<tr><td>#${o.display_id}</td><td>${esc(o.email||"")}</td><td><span class="pill">${esc(o.status)}</span></td><td><span class="pill">${esc(o.payment_status)}</span></td><td>${money(o.total,o.currency_code)}</td><td class="muted">${new Date(o.created_at).toLocaleString()}</td></tr>`).join("") || `<tr><td colspan="6" class="muted">No orders yet.</td></tr>`}</tbody></table></div>`
+}
+
+// ---------------- BOOT ----------------
+if (token) renderApp(); else renderLogin()
+</script>
+</body>
+</html>

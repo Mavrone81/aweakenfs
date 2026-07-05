@@ -1,0 +1,85 @@
+# Lightweight Docker Compose stack: SQLite backend-lite + Next.js storefront.
+#
+# No Postgres, no Redis — a single SQLite file persisted in the backend-lite-data
+# volume. Drop-in replacement for the heavy docker-compose.yml; the storefront is
+# identical and unaware of which backend it talks to.
+#
+# Quick start:
+#   1. cp .env.docker.example .env     (reuses the same vars as the heavy stack)
+#   2. docker compose -f docker-compose.lite.yml up -d --build
+#      -> backend seeds demo data on first boot, storefront waits, builds, starts
+#   3. Storefront: http://localhost:8000   Admin: http://localhost:9000/app
+#
+# See docs/DOCKER.md "Networking" for NEXT_PUBLIC_MEDUSA_BACKEND_URL (must resolve
+# from BOTH the browser and the storefront container).
+
+name: ecommercev2-lite
+
+services:
+  backend:
+    build:
+      context: ./backend-lite
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 9000
+      DB_PATH: /app/data/data.db
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      # The single publishable key handed to the storefront (via /key-exchange).
+      # Defaults to the lite key; pin NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY to override.
+      PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:-pk_lite_storefront_key}
+      # Public URLs (used to build the RinggitPay return/webhook URLs)
+      BACKEND_PUBLIC_URL: ${BACKEND_PUBLIC_URL:-http://localhost:9000}
+      STORE_URL: ${STORE_URL:-http://localhost:8000}
+      # CORS (comma-separated origins, or * for all)
+      STORE_CORS: ${STORE_CORS:-*}
+      ADMIN_CORS: ${ADMIN_CORS:-*}
+      AUTH_CORS: ${AUTH_CORS:-*}
+      # Admin bootstrap user (created on first-boot seed)
+      ADMIN_EMAIL: ${MEDUSA_ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${MEDUSA_ADMIN_PASSWORD:-supersecret}
+      # Payments (optional — leave blank to use the built-in TEST_* defaults)
+      RINGGITPAY_APP_ID: ${RINGGITPAY_APP_ID:-}
+      RINGGITPAY_REQUEST_KEY: ${RINGGITPAY_REQUEST_KEY:-}
+      RINGGITPAY_RESPONSE_KEY: ${RINGGITPAY_RESPONSE_KEY:-}
+      RINGGITPAY_IS_SANDBOX: ${RINGGITPAY_IS_SANDBOX:-false}
+    ports:
+      - "${BACKEND_PORT:-9000}:9000"
+    volumes:
+      - backend-lite-data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  storefront:
+    build:
+      context: ./storefront
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 8000
+      # IMPORTANT: baked into the browser bundle AND used by the container to reach
+      # the backend. Must resolve from both. See docs/DOCKER.md "Networking".
+      NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${NEXT_PUBLIC_MEDUSA_BACKEND_URL:-http://localhost:9000}
+      NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL:-http://localhost:8000}
+      NEXT_PUBLIC_DEFAULT_REGION: ${NEXT_PUBLIC_DEFAULT_REGION:-us}
+      # Optional: pin the key to skip the /key-exchange auto-fetch.
+      NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY:-}
+      # Host serving product media (whitelisted by next/image). For migrated data
+      # this points at the source bucket (e.g. Railway MinIO) so images render.
+      NEXT_PUBLIC_MINIO_ENDPOINT: ${NEXT_PUBLIC_MINIO_ENDPOINT:-}
+      FORCE_REBUILD: ${FORCE_REBUILD:-false}
+    ports:
+      - "${STOREFRONT_PORT:-8000}:8000"
+    volumes:
+      - storefront-next:/app/.next
+
+volumes:
+  backend-lite-data:
+  storefront-next:

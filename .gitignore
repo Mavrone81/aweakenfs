@@ -1,1 +1,12 @@
 .idea/
+
+# Local environment / secrets — never commit
+.env
+.env.*
+!.env.docker.example
+!*.env.template
+!*.env.local.template
+
+# Docker
+*.local.yml
+*.bak-pre-baked-build
