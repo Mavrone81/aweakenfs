@@ -59,3 +59,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=10 \
     CMD curl -fsS http://localhost:8000/api/healthcheck || exit 1
 ENTRYPOINT ["docker-entrypoint.sh"]
+
+# deploy-test: 2026-07-05-1322
