@@ -10,3 +10,6 @@
 # Docker
 *.local.yml
 *.bak-pre-baked-build
+
+# local copy of the prod SQLite snapshot — customer data, never commit
+prod-data.db

@@ -43,6 +43,10 @@ RUN cp docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh \
 # NEXT_PUBLIC_* are inlined into the browser bundle by `next build` — they must
 # be present now, not just at runtime. Values arrive as build args from the
 # compose file (docker-compose.lite.prod.yml storefront.build.args).
+# BAKE_BUILD=false (local dev) skips the image-time build entirely — the
+# entrypoint then builds at container start once the backend is up, exactly the
+# original local flow (docker-compose.lite.local.yml sets this).
+ARG BAKE_BUILD=true
 ARG NEXT_PUBLIC_MEDUSA_BACKEND_URL
 ARG NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
 ARG NEXT_PUBLIC_BASE_URL
@@ -53,7 +57,7 @@ ENV NEXT_PUBLIC_MEDUSA_BACKEND_URL=$NEXT_PUBLIC_MEDUSA_BACKEND_URL \
     NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL \
     NEXT_PUBLIC_DEFAULT_REGION=$NEXT_PUBLIC_DEFAULT_REGION \
     NEXT_PUBLIC_MINIO_ENDPOINT=$NEXT_PUBLIC_MINIO_ENDPOINT
-RUN pnpm run build:next
+RUN if [ "$BAKE_BUILD" = "true" ]; then pnpm run build:next; fi
 
 EXPOSE 8000
 HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=10 \
