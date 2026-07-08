@@ -146,6 +146,21 @@ const Payment = ({
       </div>
       <div>
         <div className={isOpen ? "block" : "hidden"}>
+          <div className="mb-6 rounded-lg border border-ui-border-base bg-ui-bg-subtle p-4">
+            <Text className="txt-medium-plus text-ui-fg-base mb-1">
+              Fulfilment Timeline: Up to 14 Days
+            </Text>
+            <Text className="txt-small text-ui-fg-subtle">
+              All physical products will be mailed out and digital products will
+              be emailed within 14 days.
+            </Text>
+            <Text className="txt-small text-ui-fg-subtle mt-2">
+              Kindly note that every item will first undergo a consecration
+              ritual by the Master. This sacred process requires dedicated
+              preparation time, and we appreciate your patience and
+              understanding.
+            </Text>
+          </div>
           {!paidByGiftcard && availablePaymentMethods?.length && (
             <>
               <RadioGroup
