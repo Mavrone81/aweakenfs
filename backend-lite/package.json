@@ -10,7 +10,8 @@
     "build": "tsc -p tsconfig.json",
     "serve": "node dist/server.js",
     "seed": "tsx src/seed.ts",
-    "reset": "rm -f data.db data.db-* && tsx src/seed.ts"
+    "reset": "rm -f data.db data.db-* && tsx src/seed.ts",
+    "test": "tsx --test src/**/*.test.ts"
   },
   "dependencies": {
     "better-sqlite3": "^11.8.1",

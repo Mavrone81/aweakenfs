@@ -22,6 +22,10 @@ if (regionCount === 0) {
 
 const app = express()
 
+// Behind nginx, which sets X-Forwarded-For / X-Real-IP. Without this, req.ip is
+// the proxy's address for every request.
+app.set("trust proxy", 1)
+
 app.use(
   cors({
     origin: true,
