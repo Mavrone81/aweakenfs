@@ -19,14 +19,14 @@ importers:
         specifier: ^2.0.0
         version: 2.0.1(react-dom@18.3.1(react@18.3.1))(react-hook-form@7.71.1(react@18.3.1))(react@18.3.1)
       '@medusajs/js-sdk':
-        specifier: preview
-        version: 2.13.2-preview-20260212091417
+        specifier: 2.13.2
+        version: 2.13.2
       '@medusajs/types':
-        specifier: preview
-        version: 2.13.2-preview-20260212091417
+        specifier: 2.13.2
+        version: 2.13.2
       '@medusajs/ui':
-        specifier: preview
-        version: 4.1.2-preview-20260212091417(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.1.6)
+        specifier: 4.1.2
+        version: 4.1.2(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.1.6)
       '@meilisearch/instant-meilisearch':
         specifier: ^0.7.1
         version: 0.7.1
@@ -95,11 +95,11 @@ importers:
         specifier: ^7.17.5
         version: 7.29.0
       '@medusajs/client-types':
-        specifier: preview
-        version: 0.2.12-preview-20240505115807
+        specifier: 0.2.12
+        version: 0.2.12
       '@medusajs/ui-preset':
-        specifier: preview
-        version: 2.13.2-preview-20260212091417(tailwindcss@3.4.19)
+        specifier: 2.13.2
+        version: 2.13.2(tailwindcss@3.4.19)
       '@playwright/test':
         specifier: ^1.41.1
         version: 1.58.2
@@ -536,20 +536,20 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@medusajs/client-types@0.2.12-preview-20240505115807':
-    resolution: {integrity: sha512-f7T/7WUAGOFfsNsjdCcVoWLlAqryaQB+hF0v/Dzst2hv+PdJGqHfHwTNdeK3ZYhUwzSQ8YdnCYsj9OEJR9SPiQ==}
+  '@medusajs/client-types@0.2.12':
+    resolution: {integrity: sha512-Qj7/uRaonxswzv28bWusdMQGGgVRVH6AvhppD5MhTeWDLLxHMyp8DkFjaRB7Z1yIqV+apBIGqapLUVR1IqoF8w==}
 
-  '@medusajs/icons@2.13.2-preview-20260212091417':
-    resolution: {integrity: sha512-NcV6v63S4bOfZKg5EzEZxSfpBerwm6kSerZPJ6Dp9q0XxiVB2Wi+mbCh0EqLoP0tgek87qIemhBD8sYt7GBkIA==}
+  '@medusajs/icons@2.13.2':
+    resolution: {integrity: sha512-XDoXBPXyZXZ0aqpCBBnzPEKi57rb3SZl1p1esYjmSClm4VVKz/+th9RPpXXLRlqmu46Ho5uTru/YrdWu0XvIJQ==}
     peerDependencies:
       react: ^18.3.1
 
-  '@medusajs/js-sdk@2.13.2-preview-20260212091417':
-    resolution: {integrity: sha512-T+hd5hZpp+jRnSSQ6FQuPJvBqxVvmJjxdbfnbuxPeGJKZqq/cM8VQZO8x84Va1iAR66K/6OtKtvGBIemEHxOgQ==}
+  '@medusajs/js-sdk@2.13.2':
+    resolution: {integrity: sha512-xuumyd35oX2TeIsN5awmZZivg7NR9F89Y9QUuapoQjuT6NyjrTvGQZ5CzUkdYig1Mh5j73exQUJk5Oy7J9hjeQ==}
     engines: {node: '>=20'}
 
-  '@medusajs/types@2.13.2-preview-20260212091417':
-    resolution: {integrity: sha512-m/lh2lC0whmO0P60Zfd8lieaz5NKqaKK2xHP5sjBh3Rbql8AdD4w7KI1YGYwMywCh2Iuz6EqnpjIdjjUvWbp8w==}
+  '@medusajs/types@2.13.2':
+    resolution: {integrity: sha512-T/FDH9rhmAlp00M7HnGb98wd/xFId4IKPF21Nr8uMzvZC8/H3d8SoOrrt08coxSyM/danA8qivJi3Q0xKkQ1Pg==}
     engines: {node: '>=20'}
     peerDependencies:
       ioredis: ^5.4.1
@@ -560,13 +560,13 @@ packages:
       vite:
         optional: true
 
-  '@medusajs/ui-preset@2.13.2-preview-20260212091417':
-    resolution: {integrity: sha512-FSgZPGfsurZJlg/MpOWnXSIBX+9J8YpWuvgTgQj43npEzSQvCw8kngPswRMQvm7wBysaljNNjBwd0MVnwxJpQQ==}
+  '@medusajs/ui-preset@2.13.2':
+    resolution: {integrity: sha512-GjDESVYQOFOjEwYj2eMsuS7dLVRdtsagQgkzzWmt3GsnFY9YeEo3hV62Etx5FvivzHcBdLC48jsa6Lc5Z1lWDg==}
     peerDependencies:
       tailwindcss: ^3.4.3
 
-  '@medusajs/ui@4.1.2-preview-20260212091417':
-    resolution: {integrity: sha512-onMq7mK5+A5nfs3opq6DhFGW0FvLNL49bhloNo/FytcnywrqlSWWeHdRctGcnGelfG8K1ELwF+eS4yzNwQamYA==}
+  '@medusajs/ui@4.1.2':
+    resolution: {integrity: sha512-GjRMMxucJpOzNADZrXBFDgVLBY3zNJD1XPnGsabdlyB0FU39kwDQHRgsusMAfS78lbk/myYz00dISuztqGXvmg==}
     peerDependencies:
       react: ^18.3.1
       react-dom: ^18.3.1
@@ -3163,6 +3163,10 @@ packages:
     resolution: {integrity: sha512-t7hw9pI+WvuwNJXwk5zVHpyhIqzg2qTlklJOf0mVxGSbe3Fp2VieZcduNYjaLDoy6p9uGpQEGWG87WpMKlNq8g==}
     engines: {node: '>=8'}
 
+  lodash.isequal@4.5.0:
+    resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==}
+    deprecated: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
+
   lodash.merge@4.6.2:
     resolution: {integrity: sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==}
 
@@ -3552,6 +3556,7 @@ packages:
   qs@6.9.8:
     resolution: {integrity: sha512-Sxg+ur+Bdb26nhFLYZIvRQO4IZJ4/fKBbmprLNpdEfSrQB6K41hvsTfMtQxMs8Mq/UfhUm25V1oUIBIbLLSVhA==}
     engines: {node: '>=0.6'}
+    deprecated: 'This version has regressions from a robustness refactor: parse incorrectly handles keys exceeding the depth option, and stringify incorrectly percent-encodes low-byte characters. Upgrade to 6.9.9.'
 
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
@@ -4563,39 +4568,40 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@medusajs/client-types@0.2.12-preview-20240505115807': {}
+  '@medusajs/client-types@0.2.12': {}
 
-  '@medusajs/icons@2.13.2-preview-20260212091417(react@18.3.1)':
+  '@medusajs/icons@2.13.2(react@18.3.1)':
     dependencies:
       react: 18.3.1
 
-  '@medusajs/js-sdk@2.13.2-preview-20260212091417':
+  '@medusajs/js-sdk@2.13.2':
     dependencies:
       fetch-event-stream: 0.1.6
       qs: 6.14.2
 
-  '@medusajs/types@2.13.2-preview-20260212091417':
+  '@medusajs/types@2.13.2':
     dependencies:
       bignumber.js: 9.3.1
 
-  '@medusajs/ui-preset@2.13.2-preview-20260212091417(tailwindcss@3.4.19)':
+  '@medusajs/ui-preset@2.13.2(tailwindcss@3.4.19)':
     dependencies:
       '@tailwindcss/forms': 0.5.11(tailwindcss@3.4.19)
       tailwindcss: 3.4.19
       tailwindcss-animate: 1.0.7(tailwindcss@3.4.19)
 
-  '@medusajs/ui@4.1.2-preview-20260212091417(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.1.6)':
+  '@medusajs/ui@4.1.2(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.1.6)':
     dependencies:
       '@dnd-kit/core': 6.3.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@dnd-kit/sortable': 8.0.0(@dnd-kit/core@6.3.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       '@dnd-kit/utilities': 3.2.2(react@18.3.1)
-      '@medusajs/icons': 2.13.2-preview-20260212091417(react@18.3.1)
+      '@medusajs/icons': 2.13.2(react@18.3.1)
       '@radix-ui/react-dialog': 1.1.4(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-dismissable-layer': 1.1.4(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tanstack/react-table': 8.20.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       clsx: 1.2.1
       copy-to-clipboard: 3.3.3
       cva: 1.0.0-beta.1(typescript@5.1.6)
+      lodash.isequal: 4.5.0
       prism-react-renderer: 2.4.1(react@18.3.1)
       prismjs: 1.30.0
       radix-ui: 1.1.2(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -7847,6 +7853,8 @@ snapshots:
   locate-path@5.0.0:
     dependencies:
       p-locate: 4.1.0
+
+  lodash.isequal@4.5.0: {}
 
   lodash.merge@4.6.2: {}
 
