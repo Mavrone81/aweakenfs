@@ -5,7 +5,7 @@
 # The SQLite database lives in /app/data (mounted as a volume) and is seeded on
 # first boot by docker-entrypoint.sh.
 
-FROM node:22-slim AS base
+FROM node:22.23.4-slim AS base
 WORKDIR /app
 
 # Toolchain for better-sqlite3's native build + curl for the healthcheck.
